@@ -51,7 +51,7 @@ public class JobWorker {
 
         try {
             File repoDir = gitService.cloneRepository(job.getRepositoryUrl(), jobId.toString());
-            String pythonScriptPath = "sidecars/python/python_parser.py";
+            String pythonScriptPath = "sidecars/python/parser.py";
 
             List<Path> pythonFiles;
             try (Stream<Path> paths = Files.walk(repoDir.toPath())) {
@@ -66,7 +66,7 @@ public class JobWorker {
 
                 if(fileAbsolutePath.contains("sidecars/python")) continue; // Skip the sidecar script itself
 
-                String astResult = executor.parsePythonFile(pythonScrip, fileAbsolutePath);
+                String astResult = executor.parsePythonFile(pythonScriptPath, fileAbsolutePath);
                 List<RuleEngine.ViolationResult> violationResults = engine.evaluateViewBoundary(astResult);
 
                 for (RuleEngine.ViolationResult v : violationResults) {
@@ -75,7 +75,7 @@ public class JobWorker {
                     
                     Violation entity = new Violation(jobId, relativePath, v.ruleBroken(), v.lineNumber());
                     violationRepository.save(entity);
-                    log.info("[WORKER Saved Violation] File: %s | Line: %d | Rule: %s%n",
+                    log.info("[WORKER Saved Violation] File: {} | Line: {} | Rule: {}",
                             relativePath, v.lineNumber(), v.ruleBroken());
                 }
             }

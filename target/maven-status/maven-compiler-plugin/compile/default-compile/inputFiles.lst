@@ -6,5 +6,6 @@ D:\PROJECTS\ArchGuard\archguard-engine\src\main\java\com\archguard\models\Violat
 D:\PROJECTS\ArchGuard\archguard-engine\src\main\java\com\archguard\RabbitMQConfig.java
 D:\PROJECTS\ArchGuard\archguard-engine\src\main\java\com\archguard\JobWorker.java
 D:\PROJECTS\ArchGuard\archguard-engine\src\main\java\com\archguard\models\AnalysisJob.java
+D:\PROJECTS\ArchGuard\archguard-engine\src\main\java\com\archguard\GitService.java
 D:\PROJECTS\ArchGuard\archguard-engine\src\main\java\com\archguard\SidecarExecutor.java
 D:\PROJECTS\ArchGuard\archguard-engine\src\main\java\com\archguard\RuleEngine.java

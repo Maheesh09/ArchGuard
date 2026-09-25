@@ -1,11 +1,12 @@
-com\archguard\JobWorker.class
-com\archguard\models\Violation.class
 com\archguard\models\AnalysisJob.class
-com\archguard\AnalysisController.class
-com\archguard\SidecarExecutor.class
 com\archguard\RuleEngine.class
 com\archguard\RabbitMQConfig.class
 com\archguard\repositories\AnalysisJobRepository.class
-com\archguard\repositories\ViolationRepository.class
 com\archguard\RuleEngine$ViolationResult.class
 com\archguard\Main.class
+com\archguard\JobWorker.class
+com\archguard\models\Violation.class
+com\archguard\AnalysisController.class
+com\archguard\GitService.class
+com\archguard\SidecarExecutor.class
+com\archguard\repositories\ViolationRepository.class

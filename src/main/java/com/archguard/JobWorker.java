@@ -6,6 +6,8 @@ import com.archguard.repositories.AnalysisJobRepository;
 import com.archguard.repositories.ViolationRepository;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.UUID;
@@ -13,14 +15,18 @@ import java.util.UUID;
 @Component
 public class JobWorker {
 
+    private static final Logger log = LoggerFactory.getLogger(JobWorker.class);
     private final AnalysisJobRepository jobRepository;
     private final ViolationRepository violationRepository;
-    private final SidecarExecutor executor = new SidecarExecutor();
-    private final RuleEngine engine = new RuleEngine();
+    private final SidecarExecutor executor;
+    private final RuleEngine engine;
 
-    public JobWorker(AnalysisJobRepository jobRepository, ViolationRepository violationRepository) {
+    public JobWorker(AnalysisJobRepository jobRepository, ViolationRepository violationRepository,
+                     SidecarExecutor executor, RuleEngine engine) {
         this.jobRepository = jobRepository;
         this.violationRepository = violationRepository;
+        this.executor = executor;
+        this.engine = engine;
     }
 
     @RabbitListener(queues = RabbitMQConfig.QUEUE_NAME)
@@ -50,14 +56,13 @@ public class JobWorker {
             for (RuleEngine.ViolationResult v : violationResults) {
                 Violation entity = new Violation(jobId, v.filePath(), v.ruleBroken(), v.lineNumber());
                 violationRepository.save(entity);
-                logger.info("[WORKER Saved Violation] File: %s | Line: %d | Rule: %s%n",
+                log.info("[WORKER Saved Violation] File: {} | Line: {} | Rule: {}",
                         v.filePath(), v.lineNumber(), v.ruleBroken());
             }
 
             // Mark job as COMPLETED
             job.setStatus("COMPLETED");
             jobRepository.save(job);
-            log.info("[WORKER] Job completed and saved to PostgreSQL.\n");
             log.info("[WORKER] Job completed and saved to PostgreSQL.\n");
 
         } catch (Exception e) {

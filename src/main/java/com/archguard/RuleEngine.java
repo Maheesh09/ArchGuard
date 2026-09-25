@@ -2,10 +2,12 @@ package com.archguard;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Component
 public class RuleEngine {
 
     private static final ObjectMapper mapper = new ObjectMapper();

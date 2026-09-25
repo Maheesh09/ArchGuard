@@ -1,6 +1,10 @@
 D:\PROJECTS\ArchGuard\archguard-engine\src\main\java\com\archguard\AnalysisController.java
 D:\PROJECTS\ArchGuard\archguard-engine\src\main\java\com\archguard\Main.java
+D:\PROJECTS\ArchGuard\archguard-engine\src\main\java\com\archguard\repositories\AnalysisJobRepository.java
+D:\PROJECTS\ArchGuard\archguard-engine\src\main\java\com\archguard\repositories\ViolationRepository.java
+D:\PROJECTS\ArchGuard\archguard-engine\src\main\java\com\archguard\models\Violation.java
 D:\PROJECTS\ArchGuard\archguard-engine\src\main\java\com\archguard\RabbitMQConfig.java
 D:\PROJECTS\ArchGuard\archguard-engine\src\main\java\com\archguard\JobWorker.java
+D:\PROJECTS\ArchGuard\archguard-engine\src\main\java\com\archguard\models\AnalysisJob.java
 D:\PROJECTS\ArchGuard\archguard-engine\src\main\java\com\archguard\SidecarExecutor.java
 D:\PROJECTS\ArchGuard\archguard-engine\src\main\java\com\archguard\RuleEngine.java

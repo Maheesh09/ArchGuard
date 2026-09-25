@@ -2,8 +2,12 @@ package com.archguard;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RuleEngine {
+
+    private static final Logger logger = LoggerFactory.getLogger(RuleEngine.class);
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -20,7 +24,7 @@ public class RuleEngine {
                 
                 // Rule: Views cannot import database drivers directly
                 if (importedModule.contains("sqlite3") || importedModule.contains("sqlalchemy") || importedModule.contains("psycopg2")) {
-                    System.out.printf("[VIOLATION DETECTED] File: %s | Line: %d | Forbidden Import: %s in View Layer%n",
+                    logger.warn("[VIOLATION DETECTED] File: %s | Line: %d | Forbidden Import: %s in View Layer%n",
                             filePath, imp.get("line").asInt(), importedModule);
                 }
             }

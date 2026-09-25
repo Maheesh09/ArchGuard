@@ -1,3 +1,6 @@
+com\archguard\JobWorker.class
+com\archguard\AnalysisController.class
 com\archguard\SidecarExecutor.class
 com\archguard\RuleEngine.class
+com\archguard\RabbitMQConfig.class
 com\archguard\Main.class

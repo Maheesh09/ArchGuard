@@ -9,7 +9,12 @@ import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.stream.Stream;
+
 import java.util.UUID;
 
 @Component
@@ -20,13 +25,15 @@ public class JobWorker {
     private final ViolationRepository violationRepository;
     private final SidecarExecutor executor;
     private final RuleEngine engine;
+    private final GitService gitService;
 
     public JobWorker(AnalysisJobRepository jobRepository, ViolationRepository violationRepository,
-                     SidecarExecutor executor, RuleEngine engine) {
+                     SidecarExecutor executor, RuleEngine engine, GitService gitService) {
         this.jobRepository = jobRepository;
         this.violationRepository = violationRepository;
         this.executor = executor;
         this.engine = engine;
+        this.gitService = gitService;
     }
 
     @RabbitListener(queues = RabbitMQConfig.QUEUE_NAME)
@@ -43,27 +50,39 @@ public class JobWorker {
         jobRepository.save(job);
 
         try {
-            String pythonScript = "sidecars/python/parser.py";
-            String testFile = "src/test/resources/views/test_view.py";
+            File repoDir = gitService.cloneRepository(job.getRepositoryUrl(), jobId.toString());
+            String pythonScriptPath = "sidecars/python/python_parser.py";
 
-            log.info("[WORKER] Executing Python sidecar...");
-            String astResult = executor.parsePythonFile(pythonScript, testFile);
-
-            log.info("[WORKER] Evaluating architectural boundaries...");
-            List<RuleEngine.ViolationResult> violationResults = engine.evaluateViewBoundary(astResult);
-
-            // Persist all found violations into PostgreSQL
-            for (RuleEngine.ViolationResult v : violationResults) {
-                Violation entity = new Violation(jobId, v.filePath(), v.ruleBroken(), v.lineNumber());
-                violationRepository.save(entity);
-                log.info("[WORKER Saved Violation] File: {} | Line: {} | Rule: {}",
-                        v.filePath(), v.lineNumber(), v.ruleBroken());
+            List<Path> pythonFiles;
+            try (Stream<Path> paths = Files.walk(repoDir.toPath())) {
+                pythonFiles = paths.filter(Files::isRegularFile)
+                        .filter(p -> p.toString().endsWith(".py"))
+                        .toList();
             }
+            log.info("[WORKER] Found {} Python files to analyze.", pythonFiles.size());
 
-            // Mark job as COMPLETED
+            for(Path pyFile : pythonFiles){
+                String fileAbsolutePath = pyFile.toAbsolutePath().toString();
+
+                if(fileAbsolutePath.contains("sidecars/python")) continue; // Skip the sidecar script itself
+
+                String astResult = executor.parsePythonFile(pythonScrip, fileAbsolutePath);
+                List<RuleEngine.ViolationResult> violationResults = engine.evaluateViewBoundary(astResult);
+
+                for (RuleEngine.ViolationResult v : violationResults) {
+                    // Convert absolute path back to relative path for cleaner database storage
+                    String relativePath = fileAbsolutePath.replace(repoDir.getAbsolutePath() + File.separator, "");
+                    
+                    Violation entity = new Violation(jobId, relativePath, v.ruleBroken(), v.lineNumber());
+                    violationRepository.save(entity);
+                    log.info("[WORKER Saved Violation] File: %s | Line: %d | Rule: %s%n",
+                            relativePath, v.lineNumber(), v.ruleBroken());
+                }
+            }
+            gitService.deleteDirectory(repoDir); // Clean up the cloned repository
             job.setStatus("COMPLETED");
             jobRepository.save(job);
-            log.info("[WORKER] Job completed and saved to PostgreSQL.\n");
+            log.info("[WORKER] Job ID: " + jobId + " completed successfully.");
 
         } catch (Exception e) {
             log.error("[WORKER] Job failed: " + e.getMessage());

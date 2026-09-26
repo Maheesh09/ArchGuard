@@ -1,4 +1,5 @@
 com\archguard\models\AnalysisJob.class
+com\archguard\GitHubReportingService.class
 com\archguard\RuleEngine.class
 com\archguard\RabbitMQConfig.class
 com\archguard\repositories\AnalysisJobRepository.class

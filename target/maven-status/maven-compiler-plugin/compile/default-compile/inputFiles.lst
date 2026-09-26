@@ -5,6 +5,7 @@ D:\PROJECTS\ArchGuard\archguard-engine\src\main\java\com\archguard\repositories\
 D:\PROJECTS\ArchGuard\archguard-engine\src\main\java\com\archguard\models\Violation.java
 D:\PROJECTS\ArchGuard\archguard-engine\src\main\java\com\archguard\RabbitMQConfig.java
 D:\PROJECTS\ArchGuard\archguard-engine\src\main\java\com\archguard\JobWorker.java
+D:\PROJECTS\ArchGuard\archguard-engine\src\main\java\com\archguard\GitHubReportingService.java
 D:\PROJECTS\ArchGuard\archguard-engine\src\main\java\com\archguard\models\AnalysisJob.java
 D:\PROJECTS\ArchGuard\archguard-engine\src\main\java\com\archguard\GitService.java
 D:\PROJECTS\ArchGuard\archguard-engine\src\main\java\com\archguard\SidecarExecutor.java

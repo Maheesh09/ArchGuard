@@ -1,0 +1,10 @@
+docker compose up -d
+mvn clean compile
+mvn test
+mvn spring-boot:run "-Dspring-boot.run.profiles=local"
+curl.exe -X POST http://localhost:8080/api/jobs -H "Content-Type: text/plain" -d "https://github.com/Maheesh09/IncidentIQ.git"
+
+
+// jar file creation
+mvn clean package
+java -jar target/archguard-engine-1.0.0.jar --spring.profiles.active=local

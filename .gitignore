@@ -46,3 +46,4 @@ Desktop.ini
 # Environment
 .env
 .env.*
+application-local.properties

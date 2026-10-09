@@ -51,7 +51,6 @@ public class JobWorker {
 
         try {
             File repoDir = gitService.cloneRepository(job.getRepositoryUrl(), jobId.toString());
-            String pythonScriptPath = "sidecars/python/parser.py";
 
             List<Path> pythonFiles;
             try (Stream<Path> paths = Files.walk(repoDir.toPath())) {
@@ -61,13 +60,27 @@ public class JobWorker {
             }
             log.info("[WORKER] Found {} Python files to analyze.", pythonFiles.size());
 
+            int skipped = 0;
             for(Path pyFile : pythonFiles){
-                String fileAbsolutePath = pyFile.toAbsolutePath().toString();
                 // Rules match on the path inside the repo, never on the temp clone location
                 String relativePath = relativize(repoDir.toPath(), pyFile);
 
-                String astResult = executor.parsePythonFile(pythonScriptPath, fileAbsolutePath);
-                PythonFileFacts facts = PythonFileFacts.fromJson(astResult);
+                // One unparseable file is skipped; it must not fail the whole job.
+                // SidecarUnavailableException (no Python, no script) is not caught here and fails the job.
+                PythonFileFacts facts;
+                try {
+                    facts = executor.parsePythonFile(pyFile.toAbsolutePath());
+                } catch (SidecarExecutor.SidecarException e) {
+                    skipped++;
+                    log.warn("[WORKER] Skipping {}: {}", relativePath, e.getMessage());
+                    continue;
+                }
+                if (facts.hasError()) {
+                    skipped++;
+                    log.warn("[WORKER] Skipping {}: {}", relativePath, facts.error());
+                    continue;
+                }
+
                 List<RuleEngine.ViolationResult> violationResults = engine.evaluateViewBoundary(relativePath, facts.imports());
 
                 for (RuleEngine.ViolationResult v : violationResults) {
@@ -76,6 +89,9 @@ public class JobWorker {
                     log.info("[WORKER Saved Violation] File: {} | Line: {} | Rule: {}",
                             v.filePath(), v.lineNumber(), v.ruleBroken());
                 }
+            }
+            if (skipped > 0) {
+                log.warn("[WORKER] {} of {} Python files could not be parsed and were skipped.", skipped, pythonFiles.size());
             }
             gitService.deleteDirectory(repoDir); // Clean up the cloned repository
             job.setStatus("COMPLETED");

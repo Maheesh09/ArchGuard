@@ -57,6 +57,13 @@ The worker log should report a `DB_CALL_IN_VIEW_LAYER` violation in `src/test/re
 
 Run the tests with `mvn test`.
 
+To build and run a standalone jar instead:
+
+```bash
+mvn clean package
+java -jar target/archguard-engine-1.0.0.jar
+```
+
 ## Roadmap
 
 - [x] Async job pipeline with RabbitMQ and PostgreSQL

@@ -18,6 +18,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -46,18 +47,38 @@ public class JobWorker {
         this.gitService = gitService;
     }
 
+    /**
+     * Returning normally acks the message. Bad messages are logged and dropped instead of
+     * throwing, because an exception would requeue them and redeliver them forever.
+     */
     @RabbitListener(queues = RabbitMQConfig.QUEUE_NAME)
     public void processJob(String jobIdStr) {
-        UUID jobId = UUID.fromString(jobIdStr);
+        UUID jobId;
+        try {
+            jobId = UUID.fromString(jobIdStr == null ? "" : jobIdStr.strip());
+        } catch (IllegalArgumentException e) {
+            log.warn("[WORKER] Discarding message with invalid job ID: '{}'", jobIdStr);
+            return;
+        }
         log.info("[WORKER] Picked up job ID: {}", jobId);
 
         // Fetch job from database
-        AnalysisJob job = jobRepository.findById(jobId)
-                .orElseThrow(() -> new RuntimeException("Job not found in database: " + jobId));
+        Optional<AnalysisJob> found = jobRepository.findById(jobId);
+        if (found.isEmpty()) {
+            log.warn("[WORKER] Discarding message: job {} not found in database.", jobId);
+            return;
+        }
+        AnalysisJob job = found.get();
 
         // Update status to IN_PROGRESS
         job.setStatus("IN_PROGRESS");
         jobRepository.save(job);
+
+        // A redelivered or retried job starts from a clean slate instead of duplicating violations
+        int removed = violationRepository.deleteByJobId(jobId);
+        if (removed > 0) {
+            log.info("[WORKER] Removed {} violations from a previous run of job {}.", removed, jobId);
+        }
 
         Path repoDir = null;
         try {

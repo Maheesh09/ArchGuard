@@ -119,6 +119,33 @@ class JobWorkerTest {
     }
 
     @Test
+    void deletesViolationsFromAPreviousRunBeforeAnalysing() throws Exception {
+        worker.processJob(jobId.toString());
+
+        verify(violationRepository).deleteByJobId(jobId);
+    }
+
+    @Test
+    void unknownJobIdIsAckedWithoutThrowing() throws Exception {
+        UUID unknown = UUID.randomUUID();
+        when(jobRepository.findById(unknown)).thenReturn(Optional.empty());
+
+        worker.processJob(unknown.toString()); // must not throw, or RabbitMQ would redeliver it
+
+        verify(gitService, never()).cloneRepository(any(), any());
+        verify(jobRepository, never()).save(any());
+    }
+
+    @Test
+    void malformedMessageIsAckedWithoutThrowing() throws Exception {
+        worker.processJob("not-a-uuid");
+        worker.processJob(null);
+
+        verify(jobRepository, never()).findById(any());
+        verify(gitService, never()).cloneRepository(any(), any());
+    }
+
+    @Test
     void findPythonFilesSkipsVirtualenvsGitAndCaches() throws Exception {
         writeFile("app/main.py");
         writeFile("setup.py");

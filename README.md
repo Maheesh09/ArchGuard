@@ -40,7 +40,7 @@ Java 17 · Spring Boot 3 · RabbitMQ · PostgreSQL · JGit · Python `ast` · Do
 **Requirements:** JDK 17, Maven, Docker, Python 3
 
 ```bash
-cp .env.example .env          # then set your own passwords
+cp .env.example .env          # optional: set your own passwords (used by compose and the app)
 docker compose up -d          # starts PostgreSQL and RabbitMQ
 mvn spring-boot:run           # run from the repository root
 ```

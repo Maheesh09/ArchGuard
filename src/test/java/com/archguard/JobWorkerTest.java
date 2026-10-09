@@ -1,6 +1,7 @@
 package com.archguard;
 
 import com.archguard.models.AnalysisJob;
+import com.archguard.models.JobStatus;
 import com.archguard.models.Violation;
 import com.archguard.repositories.AnalysisJobRepository;
 import com.archguard.repositories.ViolationRepository;
@@ -37,7 +38,7 @@ class JobWorkerTest {
     private final JobWorker worker = new JobWorker(jobRepository, violationRepository, executor, new RuleEngine(), gitService);
 
     private final UUID jobId = UUID.randomUUID();
-    private final AnalysisJob job = new AnalysisJob("https://github.com/owner/repo.git", "PENDING");
+    private final AnalysisJob job = new AnalysisJob("https://github.com/owner/repo.git");
     private Path repoDir;
 
     @BeforeEach
@@ -74,7 +75,7 @@ class JobWorkerTest {
         verify(violationRepository).save(saved.capture());
         assertThat(saved.getValue().getFilePath()).isEqualTo("app/views/profile.py");
         assertThat(saved.getValue().getLineNumber()).isEqualTo(2);
-        assertThat(job.getStatus()).isEqualTo("COMPLETED");
+        assertThat(job.getStatus()).isEqualTo(JobStatus.COMPLETED);
         verify(gitService).deleteQuietly(repoDir);
     }
 
@@ -93,7 +94,9 @@ class JobWorkerTest {
         worker.processJob(jobId.toString());
 
         verify(violationRepository).save(any(Violation.class));
-        assertThat(job.getStatus()).isEqualTo("COMPLETED");
+        assertThat(job.getStatus()).isEqualTo(JobStatus.COMPLETED);
+        assertThat(job.getFilesAnalyzed()).isEqualTo(1);
+        assertThat(job.getFilesSkipped()).isEqualTo(2);
     }
 
     @Test
@@ -103,7 +106,7 @@ class JobWorkerTest {
 
         worker.processJob(jobId.toString());
 
-        assertThat(job.getStatus()).isEqualTo("FAILED");
+        assertThat(job.getStatus()).isEqualTo(JobStatus.FAILED);
         verify(gitService).deleteQuietly(repoDir);
     }
 
@@ -113,7 +116,8 @@ class JobWorkerTest {
 
         worker.processJob(jobId.toString());
 
-        assertThat(job.getStatus()).isEqualTo("FAILED");
+        assertThat(job.getStatus()).isEqualTo(JobStatus.FAILED);
+        assertThat(job.getErrorMessage()).isEqualTo("network down");
         verify(gitService).deleteQuietly(repoDir);
         verify(violationRepository, never()).save(any());
     }

@@ -71,7 +71,7 @@ public class JobWorker {
         AnalysisJob job = found.get();
 
         // Update status to IN_PROGRESS
-        job.setStatus("IN_PROGRESS");
+        job.markInProgress();
         jobRepository.save(job);
 
         // A redelivered or retried job starts from a clean slate instead of duplicating violations
@@ -85,9 +85,9 @@ public class JobWorker {
             repoDir = gitService.workspaceFor(jobId.toString());
             gitService.cloneRepository(job.getRepositoryUrl(), repoDir);
 
-            analyse(jobId, repoDir);
+            AnalysisSummary summary = analyse(jobId, repoDir);
 
-            job.setStatus("COMPLETED");
+            job.markCompleted(summary.filesAnalyzed(), summary.filesSkipped());
             jobRepository.save(job);
             log.info("[WORKER] Job ID: {} completed successfully.", jobId);
 
@@ -96,7 +96,7 @@ public class JobWorker {
                 Thread.currentThread().interrupt();
             }
             log.error("[WORKER] Job {} failed: {}", jobId, e.getMessage());
-            job.setStatus("FAILED");
+            job.markFailed(e.getMessage());
             jobRepository.save(job);
         } finally {
             // Always remove the clone, whether the job succeeded or not
@@ -104,7 +104,9 @@ public class JobWorker {
         }
     }
 
-    private void analyse(UUID jobId, Path repoDir) throws IOException, InterruptedException {
+    record AnalysisSummary(int filesAnalyzed, int filesSkipped) {}
+
+    private AnalysisSummary analyse(UUID jobId, Path repoDir) throws IOException, InterruptedException {
         List<Path> pythonFiles = findPythonFiles(repoDir);
         log.info("[WORKER] Found {} Python files to analyze.", pythonFiles.size());
 
@@ -139,6 +141,7 @@ public class JobWorker {
         if (skipped > 0) {
             log.warn("[WORKER] {} of {} Python files could not be parsed and were skipped.", skipped, pythonFiles.size());
         }
+        return new AnalysisSummary(pythonFiles.size() - skipped, skipped);
     }
 
     /** All .py files under the repo, skipping VCS metadata, virtualenvs and caches. */

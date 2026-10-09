@@ -53,9 +53,26 @@ curl -X POST http://localhost:8080/api/jobs \
   -d "https://github.com/Maheesh09/ArchGuard.git"
 ```
 
-The worker log should report a `DB_CALL_IN_VIEW_LAYER` violation in `src/test/resources/views/test_view.py` at line 2.
+The API answers `202 Accepted` with the job (including its `id`) and a `Location` header. Only public `https://github.com/<owner>/<repo>` URLs are accepted; anything else (local paths, `file://`, other hosts) gets a `400`.
 
-Run the tests with `mvn test`.
+Poll the job and read its results:
+
+```bash
+curl http://localhost:8080/api/jobs/<id>              # status, files analyzed/skipped, violation count
+curl http://localhost:8080/api/jobs/<id>/violations   # file, line and rule of each violation
+```
+
+When the job is `COMPLETED`, the violations list should contain `DB_CALL_IN_VIEW_LAYER` in `src/test/resources/views/test_view.py` at line 2.
+
+| Endpoint | Description |
+|---|---|
+| `POST /api/jobs` | Queue a repository (plain-text body: the GitHub URL) |
+| `GET /api/jobs/{id}` | Job status: `PENDING`, `IN_PROGRESS`, `COMPLETED` or `FAILED` (with `errorMessage`) |
+| `GET /api/jobs/{id}/violations` | Violations found, sorted by file and line |
+
+Files that fail to parse (syntax errors, Python 2 code) are skipped and counted in `filesSkipped` instead of failing the job.
+
+Run the tests with `mvn test` (Python 3 must be on the `PATH`; the sidecar tests run the real parser).
 
 To build and run a standalone jar instead:
 

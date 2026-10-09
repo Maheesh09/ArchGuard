@@ -63,20 +63,18 @@ public class JobWorker {
 
             for(Path pyFile : pythonFiles){
                 String fileAbsolutePath = pyFile.toAbsolutePath().toString();
-
-                if(fileAbsolutePath.contains("sidecars/python")) continue; // Skip the sidecar script itself
+                // Rules match on the path inside the repo, never on the temp clone location
+                String relativePath = relativize(repoDir.toPath(), pyFile);
 
                 String astResult = executor.parsePythonFile(pythonScriptPath, fileAbsolutePath);
-                List<RuleEngine.ViolationResult> violationResults = engine.evaluateViewBoundary(astResult);
+                PythonFileFacts facts = PythonFileFacts.fromJson(astResult);
+                List<RuleEngine.ViolationResult> violationResults = engine.evaluateViewBoundary(relativePath, facts.imports());
 
                 for (RuleEngine.ViolationResult v : violationResults) {
-                    // Convert absolute path back to relative path for cleaner database storage
-                    String relativePath = fileAbsolutePath.replace(repoDir.getAbsolutePath() + File.separator, "");
-                    
-                    Violation entity = new Violation(jobId, relativePath, v.ruleBroken(), v.lineNumber());
+                    Violation entity = new Violation(jobId, v.filePath(), v.ruleBroken(), v.lineNumber());
                     violationRepository.save(entity);
                     log.info("[WORKER Saved Violation] File: {} | Line: {} | Rule: {}",
-                            relativePath, v.lineNumber(), v.ruleBroken());
+                            v.filePath(), v.lineNumber(), v.ruleBroken());
                 }
             }
             gitService.deleteDirectory(repoDir); // Clean up the cloned repository
@@ -89,5 +87,13 @@ public class JobWorker {
             job.setStatus("FAILED");
             jobRepository.save(job);
         }
+    }
+
+    /** Repo-relative path with '/' separators, e.g. "app/views/profile.py". */
+    static String relativize(Path repoRoot, Path file) {
+        return repoRoot.toAbsolutePath().normalize()
+                .relativize(file.toAbsolutePath().normalize())
+                .toString()
+                .replace(File.separatorChar, '/');
     }
 }

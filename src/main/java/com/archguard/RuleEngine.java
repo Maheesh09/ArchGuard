@@ -1,7 +1,5 @@
 package com.archguard;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -10,33 +8,62 @@ import java.util.List;
 @Component
 public class RuleEngine {
 
-    private static final ObjectMapper mapper = new ObjectMapper();
+    public static final String DB_CALL_IN_VIEW_LAYER = "DB_CALL_IN_VIEW_LAYER";
 
-    // DTO to hold rule evaluation results
+    /** Repo-relative globs that identify view-layer files. */
+    static final List<String> DEFAULT_VIEW_GLOBS = List.of(
+            "**/views/**", "**/views.py",
+            "**/ui/**", "**/ui.py");
+
+    /** Database drivers / ORMs a view must not import directly. */
+    static final List<String> DEFAULT_DB_MODULES = List.of(
+            "sqlite3", "sqlalchemy", "psycopg2", "psycopg", "pymongo", "MySQLdb", "pymysql");
+
+    // DTO to hold rule evaluation results; filePath is repo-relative with '/' separators
     public record ViolationResult(String filePath, String ruleBroken, int lineNumber) {}
 
-    public List<ViolationResult> evaluateViewBoundary(String astJson) throws Exception {
+    private final GlobMatcher viewLayer;
+    private final List<String> forbiddenModules;
+
+    public RuleEngine() {
+        this(DEFAULT_VIEW_GLOBS, DEFAULT_DB_MODULES);
+    }
+
+    public RuleEngine(List<String> viewGlobs, List<String> forbiddenModules) {
+        this.viewLayer = new GlobMatcher(viewGlobs);
+        this.forbiddenModules = List.copyOf(forbiddenModules);
+    }
+
+    /**
+     * Rule: view-layer files must not import database drivers directly.
+     *
+     * @param relativePath file path relative to the repository root
+     */
+    public List<ViolationResult> evaluateViewBoundary(String relativePath, List<ImportStatement> imports) {
+        String path = GlobMatcher.normalize(relativePath);
+        if (!viewLayer.matches(path)) {
+            return List.of();
+        }
+
         List<ViolationResult> violations = new ArrayList<>();
-        JsonNode root = mapper.readTree(astJson);
-        String filePath = root.get("file").asText();
-        JsonNode imports = root.get("imports");
-
-        boolean isViewFile = filePath.contains("views") || filePath.contains("ui");
-
-        if (isViewFile && imports.isArray()) {
-            for (JsonNode imp : imports) {
-                String importedModule = imp.has("module") ? imp.get("module").asText() : imp.get("name").asText();
-
-                // Rule: Views cannot import database drivers directly
-                if (importedModule.contains("sqlite3") || importedModule.contains("sqlalchemy") || importedModule.contains("psycopg2")) {
-                    violations.add(new ViolationResult(
-                            filePath,
-                            "DB_CALL_IN_VIEW_LAYER",
-                            imp.get("line").asInt()
-                    ));
-                }
+        for (ImportStatement imp : imports) {
+            if (importsForbiddenModule(imp)) {
+                violations.add(new ViolationResult(path, DB_CALL_IN_VIEW_LAYER, imp.line()));
             }
         }
         return violations;
+    }
+
+    private boolean importsForbiddenModule(ImportStatement imp) {
+        // Relative imports always point inside the analysed project, never at an installed driver
+        if (imp.isRelative() || imp.module() == null) {
+            return false;
+        }
+        return forbiddenModules.stream().anyMatch(forbidden -> isSameOrSubmodule(imp.module(), forbidden));
+    }
+
+    /** Exact or dotted-prefix match: "sqlalchemy.orm" matches "sqlalchemy", "my_sqlalchemy" does not. */
+    static boolean isSameOrSubmodule(String module, String parent) {
+        return module.equals(parent) || module.startsWith(parent + ".");
     }
 }

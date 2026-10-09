@@ -57,4 +57,14 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <!-- Repackages the jar so `java -jar target/archguard-engine-*.jar` works -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>

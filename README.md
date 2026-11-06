@@ -37,12 +37,14 @@ Java 17 · Spring Boot 3 · RabbitMQ · PostgreSQL · JGit · Python `ast` · Do
 
 ## Quick start
 
-**Requirements:** JDK 17, Maven, Docker, Python 3
+**Requirements:** JDK 17, Docker, Python 3. The Maven wrapper downloads the required Maven version automatically.
 
 ```bash
 cp .env.example .env          # optional: set your own passwords (used by compose and the app)
 docker compose up -d          # starts PostgreSQL and RabbitMQ
-mvn spring-boot:run           # run from the repository root
+./mvnw spring-boot:run        # macOS/Linux; run from the repository root
+# Windows PowerShell:
+.\mvnw.cmd spring-boot:run
 ```
 
 Submit a job. This repo contains a test fixture with a deliberate violation, so it can analyze itself:
@@ -72,12 +74,15 @@ When the job is `COMPLETED`, the violations list should contain `DB_CALL_IN_VIEW
 
 Files that fail to parse (syntax errors, Python 2 code) are skipped and counted in `filesSkipped` instead of failing the job.
 
-Run the tests with `mvn test` (Python 3 must be on the `PATH`; the sidecar tests run the real parser).
+Run the tests with `./mvnw test` on macOS/Linux or `mvnw.cmd test` on Windows
+(Python 3 must be on the `PATH`; the sidecar tests run the real parser).
 
 To build and run a standalone jar instead:
 
 ```bash
-mvn clean package
+./mvnw clean package          # macOS/Linux
+# Windows PowerShell:
+.\mvnw.cmd clean package
 java -jar target/archguard-engine-1.0.0.jar
 ```
 

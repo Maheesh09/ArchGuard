@@ -1,0 +1,5 @@
+# Commits that only reformat code. `git blame` skips them: GitHub does this
+# automatically; locally run `git config blame.ignoreRevsFile .git-blame-ignore-revs`.
+
+# style: apply Spotless formatting
+818db3afa784b1a475741d14bfbaaf817fe1e0b4

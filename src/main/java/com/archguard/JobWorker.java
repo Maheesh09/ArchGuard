@@ -4,10 +4,10 @@ import com.archguard.models.AnalysisJob;
 import com.archguard.models.Violation;
 import com.archguard.repositories.AnalysisJobRepository;
 import com.archguard.repositories.ViolationRepository;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,8 +29,19 @@ public class JobWorker {
 
     /** Directories that never contain the project's own source code. */
     static final Set<String> IGNORED_DIRECTORIES = Set.of(
-            ".git", ".hg", ".svn", ".venv", "venv", "env", ".tox", ".nox",
-            "node_modules", "site-packages", "__pycache__", ".mypy_cache", ".pytest_cache");
+            ".git",
+            ".hg",
+            ".svn",
+            ".venv",
+            "venv",
+            "env",
+            ".tox",
+            ".nox",
+            "node_modules",
+            "site-packages",
+            "__pycache__",
+            ".mypy_cache",
+            ".pytest_cache");
 
     private final AnalysisJobRepository jobRepository;
     private final ViolationRepository violationRepository;
@@ -38,8 +49,12 @@ public class JobWorker {
     private final RuleEngine engine;
     private final GitService gitService;
 
-    public JobWorker(AnalysisJobRepository jobRepository, ViolationRepository violationRepository,
-                     SidecarExecutor executor, RuleEngine engine, GitService gitService) {
+    public JobWorker(
+            AnalysisJobRepository jobRepository,
+            ViolationRepository violationRepository,
+            SidecarExecutor executor,
+            RuleEngine engine,
+            GitService gitService) {
         this.jobRepository = jobRepository;
         this.violationRepository = violationRepository;
         this.executor = executor;
@@ -133,13 +148,19 @@ public class JobWorker {
 
             for (RuleEngine.ViolationResult v : engine.evaluateViewBoundary(relativePath, facts.imports())) {
                 violationRepository.save(new Violation(jobId, v.filePath(), v.ruleBroken(), v.lineNumber()));
-                log.info("[WORKER Saved Violation] File: {} | Line: {} | Rule: {}",
-                        v.filePath(), v.lineNumber(), v.ruleBroken());
+                log.info(
+                        "[WORKER Saved Violation] File: {} | Line: {} | Rule: {}",
+                        v.filePath(),
+                        v.lineNumber(),
+                        v.ruleBroken());
             }
         }
 
         if (skipped > 0) {
-            log.warn("[WORKER] {} of {} Python files could not be parsed and were skipped.", skipped, pythonFiles.size());
+            log.warn(
+                    "[WORKER] {} of {} Python files could not be parsed and were skipped.",
+                    skipped,
+                    pythonFiles.size());
         }
         return new AnalysisSummary(pythonFiles.size() - skipped, skipped);
     }
@@ -150,7 +171,8 @@ public class JobWorker {
         Files.walkFileTree(repoDir, new SimpleFileVisitor<>() {
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
-                if (!dir.equals(repoDir) && IGNORED_DIRECTORIES.contains(dir.getFileName().toString())) {
+                if (!dir.equals(repoDir)
+                        && IGNORED_DIRECTORIES.contains(dir.getFileName().toString())) {
                     return FileVisitResult.SKIP_SUBTREE;
                 }
                 return FileVisitResult.CONTINUE;
@@ -170,7 +192,8 @@ public class JobWorker {
 
     /** Repo-relative path with '/' separators, e.g. "app/views/profile.py". */
     static String relativize(Path repoRoot, Path file) {
-        return repoRoot.toAbsolutePath().normalize()
+        return repoRoot.toAbsolutePath()
+                .normalize()
                 .relativize(file.toAbsolutePath().normalize())
                 .toString()
                 .replace(File.separatorChar, '/');

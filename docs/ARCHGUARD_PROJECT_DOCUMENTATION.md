@@ -607,6 +607,37 @@ The tests cover:
 5. Run `./mvnw test` on macOS/Linux or `.\mvnw.cmd test` on Windows.
 6. Run `./mvnw verify` on macOS/Linux or `.\mvnw.cmd verify` on Windows before opening a pull request.
 
+### Code formatting
+
+Formatting is enforced by the [Spotless](https://github.com/diffplug/spotless) Maven plugin. `./mvnw verify` (and therefore CI) fails if a file is not formatted. To fix everything locally:
+
+```bash
+./mvnw spotless:apply
+```
+
+On Windows PowerShell, use `.\mvnw.cmd spotless:apply`.
+
+| Files | Rules |
+|---|---|
+| Java | [palantir-java-format](https://github.com/palantir/palantir-java-format), unused imports removed, imports ordered as project imports, then `java`/`javax`, then static imports |
+| Markdown, YAML | Trailing whitespace trimmed, file ends with a newline |
+
+We chose palantir-java-format over google-java-format (AOSP style) because it keeps the 4-space indentation and 120-column lines the code already used, and lays out lambdas and builder chains such as the JGit clone call more readably.
+
+`.editorconfig` gives editors the same basics (UTF-8, LF, final newline, 4 spaces for Java and Python, 2 for YAML, JSON and Markdown), and `.gitattributes` makes git check files out with LF on every OS.
+
+The commit that first applied the formatter is listed in `.git-blame-ignore-revs`. GitHub skips it automatically; to make local `git blame` skip it too, run once:
+
+```bash
+git config blame.ignoreRevsFile .git-blame-ignore-revs
+```
+
+**Python sidecar.** Python formatting is not checked in CI yet. When editing `sidecars/python/`, we recommend formatting with [ruff](https://docs.astral.sh/ruff/formatter/):
+
+```bash
+ruff format sidecars/python
+```
+
 ---
 
 ## 11. Current Safeguards
@@ -885,6 +916,7 @@ Before submitting a change:
 - [ ] I distinguished file-level errors from job-level errors.
 - [ ] I ran `mvn test`.
 - [ ] I ran `mvn verify` when appropriate.
+- [ ] I ran `./mvnw spotless:apply` so formatting is clean.
 - [ ] I updated related documentation.
 - [ ] I did not commit `.env`, credentials, generated `target/` files, or secrets.
 

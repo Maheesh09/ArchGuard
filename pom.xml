@@ -64,6 +64,49 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+
+            <!-- Formatting. Fix locally with `./mvnw spotless:apply`; `verify` fails on unformatted files -->
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <java>
+                        <palantirJavaFormat>
+                            <version>2.103.0</version>
+                        </palantirJavaFormat>
+                        <removeUnusedImports/>
+                        <!-- Project imports, then java/javax, then static imports -->
+                        <importOrder>
+                            <order>,javax|java,\#</order>
+                        </importOrder>
+                    </java>
+                    <formats>
+                        <format>
+                            <includes>
+                                <include>*.md</include>
+                                <include>docs/**/*.md</include>
+                                <include>*.yml</include>
+                                <include>*.yaml</include>
+                                <include>.github/**/*.yml</include>
+                                <include>.github/**/*.yaml</include>
+                                <include>src/**/*.yml</include>
+                                <include>src/**/*.yaml</include>
+                            </includes>
+                            <trimTrailingWhitespace/>
+                            <endWithNewline/>
+                        </format>
+                    </formats>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 

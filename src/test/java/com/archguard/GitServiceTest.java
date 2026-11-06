@@ -19,7 +19,8 @@ class GitServiceTest {
     void workspaceIsAChildOfTheWorkspaceRoot() {
         GitService git = new GitService(tmp.toString(), 10);
 
-        assertThat(git.workspaceFor("abc")).isEqualTo(tmp.toAbsolutePath().normalize().resolve("abc"));
+        assertThat(git.workspaceFor("abc"))
+                .isEqualTo(tmp.toAbsolutePath().normalize().resolve("abc"));
     }
 
     @Test
@@ -59,8 +60,9 @@ class GitServiceTest {
         GitService git = new GitService(tmp.toString(), 10);
 
         assertThatCode(() -> {
-            git.deleteQuietly(null);
-            git.deleteQuietly(tmp.resolve("missing"));
-        }).doesNotThrowAnyException();
+                    git.deleteQuietly(null);
+                    git.deleteQuietly(tmp.resolve("missing"));
+                })
+                .doesNotThrowAnyException();
     }
 }

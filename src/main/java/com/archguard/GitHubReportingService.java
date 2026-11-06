@@ -1,6 +1,8 @@
 package com.archguard;
 
 import com.archguard.models.Violation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -11,8 +13,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -48,7 +48,8 @@ public class GitHubReportingService {
      *
      * @return true if the comment was posted, false if reporting is disabled or the request failed
      */
-    public boolean postViolationsToPullRequest(String repoOwner, String repoName, String prNumber, List<Violation> violations) {
+    public boolean postViolationsToPullRequest(
+            String repoOwner, String repoName, String prNumber, List<Violation> violations) {
         if (!isEnabled()) {
             log.debug("[GITHUB] Skipping PR report for {}/{}#{}: no token configured.", repoOwner, repoName, prNumber);
             return false;
@@ -68,7 +69,12 @@ public class GitHubReportingService {
             log.info("[GITHUB] Successfully posted report to {}/{}#{}", repoOwner, repoName, prNumber);
             return true;
         } catch (RestClientException e) {
-            log.error("[GITHUB ERROR] Failed to post comment to {}/{}#{}: {}", repoOwner, repoName, prNumber, e.getMessage());
+            log.error(
+                    "[GITHUB ERROR] Failed to post comment to {}/{}#{}: {}",
+                    repoOwner,
+                    repoName,
+                    prNumber,
+                    e.getMessage());
             return false;
         }
     }
@@ -85,7 +91,8 @@ public class GitHubReportingService {
             markdown.append("|---|---|---|\n");
 
             for (Violation v : violations) {
-                markdown.append(String.format("| `%s` | %d | **%s** |\n",
+                markdown.append(String.format(
+                        "| `%s` | %d | **%s** |\n",
                         escapeTableCell(v.getFilePath()), v.getLineNumber(), escapeTableCell(v.getRuleBroken())));
             }
         }

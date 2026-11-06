@@ -37,8 +37,10 @@ class AnalysisControllerTest {
 
     @MockitoBean
     private RabbitTemplate rabbitTemplate;
+
     @MockitoBean
     private AnalysisJobRepository jobRepository;
+
     @MockitoBean
     private ViolationRepository violationRepository;
 
@@ -54,7 +56,9 @@ class AnalysisControllerTest {
         when(jobRepository.save(any(AnalysisJob.class)))
                 .thenAnswer(inv -> jobWithId(id, inv.<AnalysisJob>getArgument(0).getRepositoryUrl()));
 
-        mvc.perform(post("/api/jobs").contentType(MediaType.TEXT_PLAIN).content("https://github.com/Maheesh09/ArchGuard"))
+        mvc.perform(post("/api/jobs")
+                        .contentType(MediaType.TEXT_PLAIN)
+                        .content("https://github.com/Maheesh09/ArchGuard"))
                 .andExpect(status().isAccepted())
                 .andExpect(header().string("Location", "http://localhost/api/jobs/" + id))
                 .andExpect(jsonPath("$.id").value(id.toString()))
@@ -78,8 +82,7 @@ class AnalysisControllerTest {
 
     @Test
     void submitRejectsAnEmptyBody() throws Exception {
-        mvc.perform(post("/api/jobs").contentType(MediaType.TEXT_PLAIN))
-                .andExpect(status().isBadRequest());
+        mvc.perform(post("/api/jobs").contentType(MediaType.TEXT_PLAIN)).andExpect(status().isBadRequest());
     }
 
     @Test
@@ -111,8 +114,8 @@ class AnalysisControllerTest {
     void getViolationsListsTheJobsViolations() throws Exception {
         UUID id = UUID.randomUUID();
         when(jobRepository.findById(id)).thenReturn(Optional.of(jobWithId(id, "https://github.com/o/r.git")));
-        when(violationRepository.findByJobIdOrderByFilePathAscLineNumberAsc(eq(id))).thenReturn(List.of(
-                new Violation(id, "app/views/a.py", "DB_CALL_IN_VIEW_LAYER", 2)));
+        when(violationRepository.findByJobIdOrderByFilePathAscLineNumberAsc(eq(id)))
+                .thenReturn(List.of(new Violation(id, "app/views/a.py", "DB_CALL_IN_VIEW_LAYER", 2)));
 
         mvc.perform(get("/api/jobs/{id}/violations", id))
                 .andExpect(status().isOk())

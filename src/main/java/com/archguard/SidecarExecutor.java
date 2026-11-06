@@ -1,10 +1,10 @@
 package com.archguard;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,13 +43,16 @@ public class SidecarExecutor {
             @Value("${archguard.sidecar.python.script:sidecars/python/parser.py}") String scriptPath,
             @Value("${archguard.sidecar.timeout-seconds:30}") long timeoutSeconds) {
         this.pythonExecutable = pythonExecutable == null || pythonExecutable.isBlank()
-                ? defaultPythonExecutable() : pythonExecutable.trim();
+                ? defaultPythonExecutable()
+                : pythonExecutable.trim();
         // A relative script path is resolved once, against the working directory at startup
         this.scriptPath = Path.of(scriptPath).toAbsolutePath().normalize();
         this.timeout = Duration.ofSeconds(timeoutSeconds);
 
         if (!Files.isRegularFile(this.scriptPath)) {
-            log.warn("[SIDECAR] Python sidecar script not found at {}. Set archguard.sidecar.python.script.", this.scriptPath);
+            log.warn(
+                    "[SIDECAR] Python sidecar script not found at {}. Set archguard.sidecar.python.script.",
+                    this.scriptPath);
         }
     }
 
@@ -58,7 +61,8 @@ public class SidecarExecutor {
             throw new SidecarUnavailableException("Python sidecar script not found: " + scriptPath, null);
         }
 
-        ProcessBuilder processBuilder = new ProcessBuilder(pythonExecutable, scriptPath.toString(), targetFile.toString());
+        ProcessBuilder processBuilder =
+                new ProcessBuilder(pythonExecutable, scriptPath.toString(), targetFile.toString());
         processBuilder.directory(scriptPath.getParent().toFile());
         processBuilder.environment().put("PYTHONIOENCODING", "utf-8");
         processBuilder.environment().put("PYTHONDONTWRITEBYTECODE", "1");
@@ -75,7 +79,8 @@ public class SidecarExecutor {
             try {
                 process = processBuilder.start();
             } catch (IOException e) {
-                throw new SidecarUnavailableException("Could not start Python sidecar with '" + pythonExecutable + "': " + e.getMessage(), e);
+                throw new SidecarUnavailableException(
+                        "Could not start Python sidecar with '" + pythonExecutable + "': " + e.getMessage(), e);
             }
 
             if (!process.waitFor(timeout.toMillis(), TimeUnit.MILLISECONDS)) {
@@ -89,7 +94,8 @@ public class SidecarExecutor {
 
             int exitCode = process.exitValue();
             if (exitCode != 0) {
-                throw new SidecarException("Sidecar exited with code " + exitCode + " on " + targetFile + ": " + truncate(stderr));
+                throw new SidecarException(
+                        "Sidecar exited with code " + exitCode + " on " + targetFile + ": " + truncate(stderr));
             }
             if (!stderr.isBlank()) {
                 log.debug("[SIDECAR] stderr for {}: {}", targetFile, truncate(stderr));

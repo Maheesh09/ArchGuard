@@ -18,7 +18,15 @@ public record JobResponse(
         Instant updatedAt) {
 
     public static JobResponse from(AnalysisJob job, long violationCount) {
-        return new JobResponse(job.getId(), job.getRepositoryUrl(), job.getStatus(), job.getErrorMessage(),
-                job.getFilesAnalyzed(), job.getFilesSkipped(), violationCount, job.getCreatedAt(), job.getUpdatedAt());
+        return new JobResponse(
+                job.getId(),
+                job.getRepositoryUrl(),
+                job.getStatus(),
+                job.getErrorMessage(),
+                job.getFilesAnalyzed(),
+                job.getFilesSkipped(),
+                violationCount,
+                job.getCreatedAt(),
+                job.getUpdatedAt());
     }
 }

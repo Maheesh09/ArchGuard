@@ -1,6 +1,7 @@
 package com.archguard.models;
 
 import jakarta.persistence.*;
+
 import java.time.Instant;
 import java.util.UUID;
 
@@ -66,12 +67,35 @@ public class AnalysisJob {
         this.errorMessage = message.length() <= MAX_ERROR_LENGTH ? message : message.substring(0, MAX_ERROR_LENGTH);
     }
 
-    public UUID getId() { return id; }
-    public String getRepositoryUrl() { return repositoryUrl; }
-    public JobStatus getStatus() { return status; }
-    public String getErrorMessage() { return errorMessage; }
-    public Integer getFilesAnalyzed() { return filesAnalyzed; }
-    public Integer getFilesSkipped() { return filesSkipped; }
-    public Instant getCreatedAt() { return createdAt; }
-    public Instant getUpdatedAt() { return updatedAt; }
+    public UUID getId() {
+        return id;
+    }
+
+    public String getRepositoryUrl() {
+        return repositoryUrl;
+    }
+
+    public JobStatus getStatus() {
+        return status;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public Integer getFilesAnalyzed() {
+        return filesAnalyzed;
+    }
+
+    public Integer getFilesSkipped() {
+        return filesSkipped;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
 }

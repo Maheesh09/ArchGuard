@@ -22,9 +22,10 @@ class PythonFileFactsTest {
         PythonFileFacts facts = PythonFileFacts.fromJson(json);
 
         assertThat(facts.hasError()).isFalse();
-        assertThat(facts.imports()).containsExactly(
-                new ImportStatement("os.path", List.of(), 0, 1),
-                new ImportStatement(null, List.of("models"), 1, 2));
+        assertThat(facts.imports())
+                .containsExactly(
+                        new ImportStatement("os.path", List.of(), 0, 1),
+                        new ImportStatement(null, List.of("models"), 1, 2));
     }
 
     @Test

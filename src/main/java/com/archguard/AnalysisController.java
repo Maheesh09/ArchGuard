@@ -20,7 +20,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.util.List;
 import java.util.UUID;
 
-
 @RestController
 @RequestMapping("/api/jobs")
 public class AnalysisController {
@@ -29,13 +28,14 @@ public class AnalysisController {
     private final AnalysisJobRepository jobRepository;
     private final ViolationRepository violationRepository;
 
-    public AnalysisController(RabbitTemplate rabbitTemplate, AnalysisJobRepository jobRepository,
-                              ViolationRepository violationRepository) {
+    public AnalysisController(
+            RabbitTemplate rabbitTemplate,
+            AnalysisJobRepository jobRepository,
+            ViolationRepository violationRepository) {
         this.rabbitTemplate = rabbitTemplate;
         this.jobRepository = jobRepository;
         this.violationRepository = violationRepository;
     }
-
 
     @PostMapping
     public ResponseEntity<JobResponse> submitJob(@RequestBody(required = false) String repositoryUrl) {
@@ -54,9 +54,11 @@ public class AnalysisController {
         rabbitTemplate.convertAndSend(RabbitMQConfig.QUEUE_NAME, job.getId().toString());
 
         // 202: the job is queued; poll the Location URL for its status
-        return ResponseEntity
-                .accepted()
-                .location(ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(job.getId()).toUri())
+        return ResponseEntity.accepted()
+                .location(ServletUriComponentsBuilder.fromCurrentRequest()
+                        .path("/{id}")
+                        .buildAndExpand(job.getId())
+                        .toUri())
                 .body(JobResponse.from(job, 0));
     }
 
@@ -75,7 +77,8 @@ public class AnalysisController {
     }
 
     private AnalysisJob findJob(UUID id) {
-        return jobRepository.findById(id)
+        return jobRepository
+                .findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Job not found: " + id));
     }
 }

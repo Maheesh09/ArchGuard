@@ -1,0 +1,7 @@
+# Check out text files with LF on every OS, matching .editorconfig and Spotless.
+* text=auto eol=lf
+
+# Windows batch files need CRLF
+*.cmd text eol=crlf
+
+*.jar binary

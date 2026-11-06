@@ -35,7 +35,8 @@ class JobWorkerTest {
     private final ViolationRepository violationRepository = mock(ViolationRepository.class);
     private final SidecarExecutor executor = mock(SidecarExecutor.class);
     private final GitService gitService = mock(GitService.class);
-    private final JobWorker worker = new JobWorker(jobRepository, violationRepository, executor, new RuleEngine(), gitService);
+    private final JobWorker worker =
+            new JobWorker(jobRepository, violationRepository, executor, new RuleEngine(), gitService);
 
     private final UUID jobId = UUID.randomUUID();
     private final AnalysisJob job = new AnalysisJob("https://github.com/owner/repo.git");
@@ -102,7 +103,8 @@ class JobWorkerTest {
     @Test
     void failsTheJobWhenTheSidecarCannotRunAtAll() throws Exception {
         writeFile("views/a.py");
-        when(executor.parsePythonFile(any())).thenThrow(new SidecarExecutor.SidecarUnavailableException("no python", null));
+        when(executor.parsePythonFile(any()))
+                .thenThrow(new SidecarExecutor.SidecarUnavailableException("no python", null));
 
         worker.processJob(jobId.toString());
 

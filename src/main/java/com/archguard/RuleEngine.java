@@ -16,8 +16,8 @@ public class RuleEngine {
             "**/ui/**", "**/ui.py");
 
     /** Database drivers / ORMs a view must not import directly. */
-    static final List<String> DEFAULT_DB_MODULES = List.of(
-            "sqlite3", "sqlalchemy", "psycopg2", "psycopg", "pymongo", "MySQLdb", "pymysql");
+    static final List<String> DEFAULT_DB_MODULES =
+            List.of("sqlite3", "sqlalchemy", "psycopg2", "psycopg", "pymongo", "MySQLdb", "pymysql");
 
     // DTO to hold rule evaluation results; filePath is repo-relative with '/' separators
     public record ViolationResult(String filePath, String ruleBroken, int lineNumber) {}

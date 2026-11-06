@@ -1,6 +1,7 @@
 package com.archguard.models;
 
 import jakarta.persistence.*;
+
 import java.util.UUID;
 
 @Entity
@@ -26,9 +27,23 @@ public class Violation {
     }
 
     // Getters
-    public UUID getId() { return id; }
-    public UUID getJobId() { return jobId; }
-    public String getFilePath() { return filePath; }
-    public String getRuleBroken() { return ruleBroken; }
-    public int getLineNumber() { return lineNumber; }
+    public UUID getId() {
+        return id;
+    }
+
+    public UUID getJobId() {
+        return jobId;
+    }
+
+    public String getFilePath() {
+        return filePath;
+    }
+
+    public String getRuleBroken() {
+        return ruleBroken;
+    }
+
+    public int getLineNumber() {
+        return lineNumber;
+    }
 }

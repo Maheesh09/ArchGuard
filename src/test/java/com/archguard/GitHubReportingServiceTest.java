@@ -22,14 +22,16 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 class GitHubReportingServiceTest {
 
     private final RestTemplate restTemplate = new RestTemplate();
-    private final MockRestServiceServer server = MockRestServiceServer.bindTo(restTemplate).build();
+    private final MockRestServiceServer server =
+            MockRestServiceServer.bindTo(restTemplate).build();
 
     @Test
     void skipsReportingWhenTokenIsBlank() {
         GitHubReportingService service = new GitHubReportingService("  ", restTemplate);
 
         assertThat(service.isEnabled()).isFalse();
-        assertThat(service.postViolationsToPullRequest("owner", "repo", "1", List.of())).isFalse();
+        assertThat(service.postViolationsToPullRequest("owner", "repo", "1", List.of()))
+                .isFalse();
         server.verify(); // no request was made
     }
 
@@ -45,7 +47,8 @@ class GitHubReportingServiceTest {
                 .andExpect(jsonPath("$.body").value(containsString(trickyPath)))
                 .andRespond(withSuccess("{}", MediaType.APPLICATION_JSON));
 
-        assertThat(service.postViolationsToPullRequest("owner", "repo", "42", List.of(tricky))).isTrue();
+        assertThat(service.postViolationsToPullRequest("owner", "repo", "42", List.of(tricky)))
+                .isTrue();
         server.verify();
     }
 
@@ -55,7 +58,8 @@ class GitHubReportingServiceTest {
         server.expect(requestTo("https://api.github.com/repos/owner/repo/issues/1/comments"))
                 .andRespond(withServerError());
 
-        assertThat(service.postViolationsToPullRequest("owner", "repo", "1", List.of())).isFalse();
+        assertThat(service.postViolationsToPullRequest("owner", "repo", "1", List.of()))
+                .isFalse();
         server.verify();
     }
 

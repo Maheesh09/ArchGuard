@@ -39,12 +39,13 @@ class SidecarExecutorTest {
         PythonFileFacts facts = executor.parsePythonFile(file);
 
         assertThat(facts.hasError()).isFalse();
-        assertThat(facts.imports()).containsExactly(
-                new ImportStatement("os", List.of(), 0, 1),
-                new ImportStatement("sqlalchemy.orm", List.of(), 0, 1),
-                new ImportStatement("flask", List.of("Flask", "request"), 0, 2),
-                new ImportStatement(null, List.of("models"), 1, 3),
-                new ImportStatement("services.user", List.of("UserService"), 2, 4));
+        assertThat(facts.imports())
+                .containsExactly(
+                        new ImportStatement("os", List.of(), 0, 1),
+                        new ImportStatement("sqlalchemy.orm", List.of(), 0, 1),
+                        new ImportStatement("flask", List.of("Flask", "request"), 0, 2),
+                        new ImportStatement(null, List.of("models"), 1, 3),
+                        new ImportStatement("services.user", List.of("UserService"), 2, 4));
     }
 
     @Test
@@ -61,7 +62,7 @@ class SidecarExecutorTest {
     @Test
     void reportsNullBytesAsDataInsteadOfFailing() throws Exception {
         Path file = tmp.resolve("binary.py");
-        Files.write(file, new byte[]{'i', 'm', 'p', 'o', 'r', 't', ' ', 'o', 's', 0, '\n'});
+        Files.write(file, new byte[] {'i', 'm', 'p', 'o', 'r', 't', ' ', 'o', 's', 0, '\n'});
 
         PythonFileFacts facts = executor.parsePythonFile(file);
 
@@ -114,9 +115,11 @@ class SidecarExecutorTest {
     void missingInterpreterOrScriptMeansTheSidecarIsUnavailable() throws Exception {
         Path file = write("a.py", "");
 
-        assertThatThrownBy(() -> new SidecarExecutor("definitely-not-a-python-binary", SCRIPT, 10).parsePythonFile(file))
+        assertThatThrownBy(
+                        () -> new SidecarExecutor("definitely-not-a-python-binary", SCRIPT, 10).parsePythonFile(file))
                 .isInstanceOf(SidecarExecutor.SidecarUnavailableException.class);
-        assertThatThrownBy(() -> new SidecarExecutor("", tmp.resolve("missing.py").toString(), 10).parsePythonFile(file))
+        assertThatThrownBy(
+                        () -> new SidecarExecutor("", tmp.resolve("missing.py").toString(), 10).parsePythonFile(file))
                 .isInstanceOf(SidecarExecutor.SidecarUnavailableException.class);
     }
 }

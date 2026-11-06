@@ -131,7 +131,7 @@ C#, Java, or .NET/Roslyn sidecars.
 - JGit
 - Python 3 and the standard-library `ast` module
 - Docker Compose
-- Maven
+- Maven (downloaded by the Maven wrapper)
 - JUnit 5 and Spring Boot Test
 
 ---
@@ -484,7 +484,7 @@ inserted, preventing duplicate results.
 ### Prerequisites
 
 - JDK 17
-- Maven
+- Maven (downloaded by the Maven wrapper)
 - Python 3 available on `PATH`
 - Docker Desktop
 
@@ -530,15 +530,19 @@ Services:
 ### Run the application
 
 ```bash
-mvn spring-boot:run
+./mvnw spring-boot:run
 ```
+
+On Windows PowerShell, use `.\mvnw.cmd spring-boot:run`.
 
 Or build and run the standalone jar:
 
 ```bash
-mvn clean package
+./mvnw clean package
 java -jar target/archguard-engine-1.0.0.jar
 ```
+
+On Windows PowerShell, use `.\mvnw.cmd clean package`.
 
 ### Important configuration
 
@@ -567,14 +571,18 @@ GitHub reporting is disabled when `GITHUB_API_TOKEN` is blank.
 Run the unit and integration-style tests:
 
 ```bash
-mvn test
+./mvnw test
 ```
+
+On Windows PowerShell, use `.\mvnw.cmd test`.
 
 Run the complete Maven verification lifecycle:
 
 ```bash
-mvn verify
+./mvnw verify
 ```
+
+On Windows PowerShell, use `.\mvnw.cmd verify`.
 
 The tests cover:
 
@@ -596,8 +604,8 @@ The tests cover:
 2. Implement the smallest rule change.
 3. Run the focused test.
 4. Add or adjust parser fixtures if needed.
-5. Run `mvn test`.
-6. Run `mvn verify` before opening a pull request.
+5. Run `./mvnw test` on macOS/Linux or `.\mvnw.cmd test` on Windows.
+6. Run `./mvnw verify` on macOS/Linux or `.\mvnw.cmd verify` on Windows before opening a pull request.
 
 ---
 
@@ -895,13 +903,13 @@ Before submitting a change:
 4. Run the tests:
 
    ```bash
-   mvn test
+   ./mvnw test
    ```
 
 5. Start the application:
 
    ```bash
-   mvn spring-boot:run
+   ./mvnw spring-boot:run
    ```
 
 6. Submit the ArchGuard repository URL.
@@ -948,4 +956,3 @@ clones public GitHub repositories, delegates source parsing to native language
 sidecars, converts parser output into normalized facts such as
 `ImportStatement`, applies architectural rules, stores violations in
 PostgreSQL, and exposes the results through a REST API.**
-

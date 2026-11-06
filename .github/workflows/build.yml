@@ -30,4 +30,4 @@ jobs:
           python-version: '3.12'
 
       - name: Build and test
-        run: mvn -B verify
+        run: ./mvnw -B verify

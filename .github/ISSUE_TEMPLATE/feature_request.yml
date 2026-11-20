@@ -1,0 +1,46 @@
+name: Feature request
+description: Suggest a new capability or an improvement to an existing one.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Proposing a new architectural rule? Use the **New rule** form instead.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What can't you do today, or what is harder than it should be?
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: What should ArchGuard do? Include API shapes or config examples if you have them.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: pipeline-stage
+    attributes:
+      label: Pipeline stage
+      description: Which parts of the pipeline would this change? Pick all that apply.
+      multiple: true
+      options:
+        - API
+        - Worker
+        - Sidecar
+        - Rules
+        - Reporting
+        - Not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other approaches or workarounds, and why they fall short.

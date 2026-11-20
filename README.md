@@ -96,6 +96,10 @@ java -jar target/archguard-engine-1.0.0.jar
 - [ ] Separate, horizontally scaled workers with retries and a dead letter queue
 - [ ] .NET Roslyn sidecar
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for branch and commit conventions, the test-first workflow for new rules, and what to check before opening a pull request. Bugs, features, and rule proposals each have an issue form.
+
 ## Author
 
 Built by [Maheesha Pramuditha](https://www.linkedin.com/in/maheeshapramuditha)

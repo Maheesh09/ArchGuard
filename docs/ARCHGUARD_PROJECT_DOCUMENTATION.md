@@ -922,7 +922,7 @@ Good first contribution areas:
 
 ## 16. Contributor Checklist
 
-Before submitting a change:
+Before submitting a change (the same list is in `.github/pull_request_template.md`, so update both together):
 
 - [ ] I understand which pipeline stage I am changing.
 - [ ] I preserved the API contract or intentionally documented the change.
@@ -930,8 +930,8 @@ Before submitting a change:
 - [ ] I use repository-relative paths with `/` separators.
 - [ ] I preserved timeout and cleanup behavior.
 - [ ] I distinguished file-level errors from job-level errors.
-- [ ] I ran `mvn test`.
-- [ ] I ran `mvn verify` when appropriate.
+- [ ] I ran `./mvnw test`.
+- [ ] I ran `./mvnw verify` when appropriate.
 - [ ] I ran `./mvnw spotless:apply` so formatting is clean.
 - [ ] I updated related documentation.
 - [ ] I did not commit `.env`, credentials, generated `target/` files, or secrets.

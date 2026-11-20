@@ -598,6 +598,22 @@ The tests cover:
 | GitHub report formatting | `GitHubReportingServiceTest` |
 | Git clone and cleanup | `GitServiceTest` |
 
+### Coverage
+
+Coverage is measured by [JaCoCo](https://www.jacoco.org/jacoco/). `./mvnw verify` writes an HTML report to `target/site/jacoco/index.html`. Open it in a browser to see coverage per package, class, and line:
+
+```bash
+./mvnw verify
+open target/site/jacoco/index.html       # macOS
+xdg-open target/site/jacoco/index.html   # Linux
+```
+
+On Windows PowerShell, use `.\mvnw.cmd verify` and then `start target\site\jacoco\index.html`.
+
+The build fails if line coverage across the module drops below 70 percent. `Main` and `RabbitMQConfig` are excluded from that check because they only contain startup and wiring code. The threshold lives in the `jacoco-maven-plugin` section of `pom.xml`.
+
+CI uploads the report from every run as the `jacoco-report` artifact, including runs that fail. Download it from the run's summary page on GitHub.
+
 ### Test-first workflow for a new rule
 
 1. Add a failing test in `RuleEngineTest`.

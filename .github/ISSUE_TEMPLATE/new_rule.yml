@@ -1,0 +1,64 @@
+name: New rule
+description: Propose a new architectural rule for the rule engine.
+labels: [enhancement, "area: rules"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A good rule proposal reads like a test case: one file that should be flagged, and one that should not.
+        See [section 7 of the documentation](https://github.com/Maheesh09/ArchGuard/blob/main/docs/ARCHGUARD_PROJECT_DOCUMENTATION.md#7-current-rule-engine) for how the current rule works.
+
+  - type: input
+    id: rule-id
+    attributes:
+      label: Rule ID
+      description: Upper snake case, describing the violation.
+      placeholder: DB_CALL_IN_VIEW_LAYER
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What the rule detects and why it is an architectural problem.
+    validations:
+      required: true
+
+  - type: textarea
+    id: violating-example
+    attributes:
+      label: Violating example
+      description: A file the rule should flag. Include its repository-relative path in a comment on the first line.
+      render: python
+      placeholder: |
+        # app/views/profile.py
+        import sqlite3
+    validations:
+      required: true
+
+  - type: textarea
+    id: compliant-example
+    attributes:
+      label: Compliant example
+      description: A similar file the rule should not flag.
+      render: python
+      placeholder: |
+        # app/views/profile.py
+        from app.services import profile_service
+    validations:
+      required: true
+
+  - type: textarea
+    id: configuration
+    attributes:
+      label: Configuration
+      description: What a repository needs to configure for this rule, in the planned `archguard.yml` format. Write "None" if it needs nothing.
+      render: yaml
+      placeholder: |
+        forbidden_imports:
+          view: ["sqlite3", "sqlalchemy"]
+        rules:
+          db_call_in_view_layer: {severity: error}
+    validations:
+      required: true

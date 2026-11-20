@@ -1,0 +1,54 @@
+name: Bug report
+description: ArchGuard did something wrong, crashed, or reported the wrong violations.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting this. Please remove tokens, passwords, and other secrets from anything you paste below.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: If the job failed, include its `status` and `errorMessage` from `GET /api/jobs/{id}`.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+
+  - type: input
+    id: repository-url
+    attributes:
+      label: Repository URL analysed
+      placeholder: https://github.com/owner/repo
+    validations:
+      required: true
+
+  - type: input
+    id: job-id
+    attributes:
+      label: Job ID
+      description: The `id` returned by `POST /api/jobs`, if a job was created.
+      placeholder: 3f2b8c1e-...
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Relevant application log lines, for example the ones tagged `[WORKER]`.
+      render: text
+
+  - type: input
+    id: version
+    attributes:
+      label: ArchGuard version or commit
+      description: The jar version, or the output of `git rev-parse --short HEAD`.
+      placeholder: 1.0.0 or 6df9810
+    validations:
+      required: true

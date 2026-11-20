@@ -31,3 +31,11 @@ jobs:
 
       - name: Build and test
         run: ./mvnw -B verify
+
+      # Runs even when verify fails, so a coverage drop can be inspected
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: target/site/jacoco/
